@@ -13,23 +13,12 @@ local Workspace         = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 local Camera      = Workspace.CurrentCamera
 
--- ─── ESPERAR REMOTES ─────────────────────────────────────────
-local RemoteFolder      = ReplicatedStorage:WaitForChild("BloodPowerEvents", 20)
-local RE_BloodBall      = RemoteFolder:WaitForChild("BloodBall")
-local RE_BloodCorpuscle = RemoteFolder:WaitForChild("BloodCorpuscle")
-local RE_BloodWhip      = RemoteFolder:WaitForChild("BloodWhip")
-local RE_Souls1000      = RemoteFolder:WaitForChild("Souls1000")
-local RE_Effect         = RemoteFolder:WaitForChild("EffectToAll")
-local RE_Stun           = RemoteFolder:WaitForChild("StunTarget")
-local RE_Unlock1000     = RemoteFolder:WaitForChild("Unlock1000Souls")
-local RE_Anim           = RemoteFolder:WaitForChild("PlayAnim")
-local RE_Bracelet       = RemoteFolder:WaitForChild("SpawnBracelet")
--- Rayos
-local RE_LightningBolt  = RemoteFolder:WaitForChild("LightningBolt")
-local RE_ThunderChain   = RemoteFolder:WaitForChild("ThunderChain")
-local RE_ElectricStorm  = RemoteFolder:WaitForChild("ElectricStorm")
-local RE_SupremeDisch   = RemoteFolder:WaitForChild("SupremeDisch")
-local RE_UnlockSupreme  = RemoteFolder:WaitForChild("UnlockSupreme")
+-- ─── REMOTES (declarados aquí, asignados en background tras crear la GUI) ──
+-- IMPORTANTE: No se llaman WaitForChild aquí para que la GUI aparezca
+-- inmediatamente aunque el ServerScript tarde en arrancar.
+local RE_BloodBall, RE_BloodCorpuscle, RE_BloodWhip, RE_Souls1000
+local RE_Effect, RE_Stun, RE_Unlock1000, RE_Anim, RE_Bracelet
+local RE_LightningBolt, RE_ThunderChain, RE_ElectricStorm, RE_SupremeDisch, RE_UnlockSupreme
 
 -- ─── ESTADO LOCAL ────────────────────────────────────────────
 local isStunnedLocal  = false
@@ -1012,6 +1001,33 @@ local function electricRingExplosion(pos,color)
 end
 
 -- ═══════════════════════════════════════════════════════════════
+--  CONEXIÓN DE REMOTES EN BACKGROUND
+--  (se hace después de crear la GUI para que el jugador vea
+--   el carrusel inmediatamente aunque el server tarde en cargar)
+-- ═══════════════════════════════════════════════════════════════
+task.spawn(function()
+    local RemoteFolder = ReplicatedStorage:WaitForChild("BloodPowerEvents", 30)
+    if not RemoteFolder then
+        warn("[Powers] ¡BloodPowerEvents no encontrado! Asegúrate de que el Script está en ServerScriptService.")
+        return
+    end
+    RE_BloodBall      = RemoteFolder:WaitForChild("BloodBall")
+    RE_BloodCorpuscle = RemoteFolder:WaitForChild("BloodCorpuscle")
+    RE_BloodWhip      = RemoteFolder:WaitForChild("BloodWhip")
+    RE_Souls1000      = RemoteFolder:WaitForChild("Souls1000")
+    RE_Effect         = RemoteFolder:WaitForChild("EffectToAll")
+    RE_Stun           = RemoteFolder:WaitForChild("StunTarget")
+    RE_Unlock1000     = RemoteFolder:WaitForChild("Unlock1000Souls")
+    RE_Anim           = RemoteFolder:WaitForChild("PlayAnim")
+    RE_Bracelet       = RemoteFolder:WaitForChild("SpawnBracelet")
+    RE_LightningBolt  = RemoteFolder:WaitForChild("LightningBolt")
+    RE_ThunderChain   = RemoteFolder:WaitForChild("ThunderChain")
+    RE_ElectricStorm  = RemoteFolder:WaitForChild("ElectricStorm")
+    RE_SupremeDisch   = RemoteFolder:WaitForChild("SupremeDisch")
+    RE_UnlockSupreme  = RemoteFolder:WaitForChild("UnlockSupreme")
+    print("[Powers] Remotes conectados correctamente ✓")
+
+-- ═══════════════════════════════════════════════════════════════
 --  EVENTOS DEL SERVIDOR → CLIENTE
 -- ═══════════════════════════════════════════════════════════════
 
@@ -1166,10 +1182,13 @@ RE_UnlockSupreme.OnClientEvent:Connect(function()
     shakeCamera(0.8,1.0)
 end)
 
+end) -- ── FIN task.spawn de conexión de remotes ──────────────────
+
 -- ═══════════════════════════════════════════════════════════════
 --  KEYBINDS — SANGRE
 -- ═══════════════════════════════════════════════════════════════
 local function fireBloodBall()
+    if not RE_BloodBall then return end
     if cooldownActive.BloodBall then return end
     if isStunnedLocal and tick()<stunEndTime then return end
     startCooldownVisual("BloodBall",COOLDOWN.BloodBall,cd1,cdt1)
@@ -1178,6 +1197,7 @@ local function fireBloodBall()
     end)
 end
 local function fireBloodCorpuscle()
+    if not RE_BloodCorpuscle then return end
     if cooldownActive.BloodCorpuscle then return end
     if isStunnedLocal and tick()<stunEndTime then return end
     startCooldownVisual("BloodCorpuscle",COOLDOWN.BloodCorpuscle,cd2,cdt2)
@@ -1186,6 +1206,7 @@ local function fireBloodCorpuscle()
     end)
 end
 local function fireBloodWhip()
+    if not RE_BloodWhip then return end
     if cooldownActive.BloodWhip then return end
     if isStunnedLocal and tick()<stunEndTime then return end
     startCooldownVisual("BloodWhip",COOLDOWN.BloodWhip,cd3,cdt3)
@@ -1194,6 +1215,7 @@ local function fireBloodWhip()
     end)
 end
 local function fireSouls1000()
+    if not RE_Souls1000 then return end
     if not souls1000Button or not souls1000Button.Visible then return end
     if cooldownActive.Souls1000 then return end
     if isStunnedLocal and tick()<stunEndTime then return end
@@ -1207,6 +1229,7 @@ end
 --  KEYBINDS — RAYO
 -- ═══════════════════════════════════════════════════════════════
 local function fireLightningBolt()
+    if not RE_LightningBolt then return end
     if cooldownActive.LightningBolt then return end
     if isStunnedLocal and tick()<stunEndTime then return end
     startCooldownVisual("LightningBolt",COOLDOWN.LightningBolt,lcd1,lcdt1)
@@ -1215,6 +1238,7 @@ local function fireLightningBolt()
     end)
 end
 local function fireThunderChain()
+    if not RE_ThunderChain then return end
     if cooldownActive.ThunderChain then return end
     if isStunnedLocal and tick()<stunEndTime then return end
     startCooldownVisual("ThunderChain",COOLDOWN.ThunderChain,lcd2,lcdt2)
@@ -1223,6 +1247,7 @@ local function fireThunderChain()
     end)
 end
 local function fireElectricStorm()
+    if not RE_ElectricStorm then return end
     if cooldownActive.ElectricStorm then return end
     if isStunnedLocal and tick()<stunEndTime then return end
     startCooldownVisual("ElectricStorm",COOLDOWN.ElectricStorm,lcd3,lcdt3)
@@ -1231,6 +1256,7 @@ local function fireElectricStorm()
     end)
 end
 local function fireSupremeDisch()
+    if not RE_SupremeDisch then return end
     if not supremeButton or not supremeButton.Visible then return end
     if cooldownActive.SupremeDisch then return end
     if isStunnedLocal and tick()<stunEndTime then return end
